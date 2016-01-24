@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+	<head>
+		<meta charset="urf-8" />
+		<title>Course</title>
+	</head>
+	<style>
+		#graphs{
+			outline: 3px solid lime;
+			height: 300px;
+		}
+		ul.ztree{
+			display: inline-block;
+			width: 300px;
+			overflow: auto;
+		}
+	</style>
+	<body>
+		<ul id="all_course_list" class="ztree"></ul>
+		<ul id="selected_course_list" class="ztree"></ul>
+		<button id="start_arrange">Start!</button>
+		<div id="graphs"></div>
+	</body>
+	<link rel="stylesheet" type="text/css" href="css/demo.css">
+	<link rel="stylesheet" type="text/css" href="css/zTreeStyle/zTreeStyle.css">
+	<script type="text/javascript" src="js/jquery-1.12.0.min.js"></script>
+	<script type="text/javascript" src="js/ztree/jquery.ztree.all-3.5.min.js"></script>
+	<script>
+		var coursesTree;
+		var slctdTree;
+		var slctdCourses = [];
+		function addNodeToSelected( nodes ){
+			var parentNode;
+
+			//if is parent, add directly
+			if( nodes.isParent ){
+				parentNode = slctdTree.copyNode(null, nodes );
+				return false;
+			}
+
+			parentNode = slctdTree.getNodeByParam( 'cid', nodes.classname );
+			//if parent doesn't exists, add parent node
+			if( !parentNode ){
+				parentNode = slctdTree.copyNode( null, nodes.getParentNode() );
+				slctdTree.removeChildNodes( parentNode );
+			}
+			// append node to parent node
+			slctdTree.copyNode( parentNode, nodes );
+			// done
+		}
+
+		function removeNodeFromSelected( nodes ){
+			var parentNode;
+			var n = slctdTree.getNodeByParam( 'cid', nodes.cid );
+			if( nodes.isParent ){
+				slctdTree.removeChildNodes( n );
+				slctdTree.removeNode( n );
+			}
+			else{
+				slctdTree.removeNode( n );
+				parentNode = slctdTree.getNodeByParam( 'cid', nodes.classname );
+				if( !parentNode.children.length ){
+					slctdTree.removeNode( parentNode );
+				}
+			}
+		}
+
+		$(document).ready(function(){
+			$.get('api.php',{action:'course_list'}, function( data ){
+				var courseNodes = $.parseJSON( data );
+				coursesTree = $.fn.zTree.init(
+					$("#all_course_list"),
+					{
+						data: {
+							simpleData: {
+								enable: true,
+								idKey: 'cid',
+								pIdKey: 'parentName'
+							}
+						},
+						check:{
+							enable: true,
+							autoCheckTrigger: false
+						},
+						callback: {
+							onCheck:function(e, treeId, treeNode){
+								if( treeNode.checked ){
+									addNodeToSelected( treeNode );
+								}
+								else{
+									removeNodeFromSelected( treeNode );
+								}
+							}
+						}
+					},
+					courseNodes
+				);
+			});
+			slctdTree = $.fn.zTree.init($("#selected_course_list"), {
+				data: {
+						simpleData: {
+							enable: true,
+							idKey: 'cid',
+							pIdKey: 'parentName'
+						}
+					}
+			}, []);
+			$('#start_arrange').on('click', function(){
+				var courses = slctdTree.getNodesByParam('isParent', true);
+				courses = arrangeForMinEdges( courses );
+				return true;
+				addNodesToCytoFromZTree( courses );
+				window.scrollTo(0, 100000);
+			});
+		});
+	</script>
+	<script type="text/javascript" src="js/cytoscape.min.js"></script>
+	<script type="text/javascript">
+		var cy = cytoscape({
+			container: document.getElementById('graphs'),
+			style: cytoscape.stylesheet()
+				.selector('node')
+				  .css({
+				    'content': 'data(courseName)',
+				    'background-color': '#eee'
+				  })
+				.selector('node > node')
+				  .css({
+				    'content': 'data(id)',
+				    'background-color': '#999'
+				  })
+				.selector('edge')
+				  .css({
+				    'target-arrow-shape': 'triangle',
+				    'width': 4,
+				    'line-color': '#ddd',
+				    'target-arrow-color': '#ddd'
+				  })
+				.selector('.highlighted')
+				  .css({
+				    'background-color': '#61bffc',
+				    'line-color': '#61bffc',
+				    'target-arrow-color': '#61bffc',
+				    'transition-property': 'background-color, line-color, target-arrow-color',
+				    'transition-duration': '0.5s'
+				  })
+		});
+		//todo:: get course from db !!done
+		//todo:: select few course for test!!done
+		//todo:: make course selectable(ztree)!!done
+		//todo:: 不同学院开的课不要放在一起
+		//
+		//start to generate
+		//todo:: sort by my algo
+		//todo:: add courses to graph!!done
+		//todo:: add courses only if time is not conflict
+		//todo:: wright backtrace dfs algo( find all posible paths )
+		//
+		function arrangeForMinEdges( courses ){
+			var arrangedCourses = [];
+			var indicies = [ -1 ]; //init
+			var courseLengths = [];
+			var courseAmount = courses.length;
+			for( var i in courses ){
+				courseLengths.push( courses[i].children );
+			}
+			courseLengths.sort();
+
+			for( var i = 0; i < courseAmount; i++ ){
+				var plusminus = Math.pow( -1, (i*(i+1))/2 );
+				var amount = Math.pow( i, i%2 );
+				var index = indicies[ indicies.length - 1 ] + plusminus * amount;
+				indicies.push( index );
+
+				var pos = i*Math.pow( 0, i%2 );
+				//append
+				if( pos ){
+					arrangedCourses.push( index );
+				}
+				else{ //prepend
+					arrangedCourses.unshift( index );
+				}
+			}
+			console.log( indicies );
+			console.log( arrangedCourses );
+			return arrangedCourses;
+		}
+		function addNodesToCytoFromZTree( courses ){
+			var n = 0;
+			var nodes = [];
+			var edges = [];
+
+			for( var k in courses ){
+				var course = courses[k];
+				//supernode (aka, node group)
+				nodes.push({
+					data: {
+						id: course['tId'],
+						courseName: course['name']
+					}
+				});
+
+
+				//classes node
+				var classes = course.children;
+				for( var j in classes ){
+					var classs = classes[j];
+					nodes.push({
+						data:{
+							id: classs['cid'],
+							parent: course['tId']
+						},
+						position:{ x: 30*(j+1), y: (k+1)*30 }
+					});
+
+					// 第二个课程要与第一个课程建立边
+					if( k > 0 ){
+						for( var m in courses[k-1].children ){
+							var sNode = courses[k-1].children[m];
+							var self = classs['cid'];
+							// 判断时间冲不冲突
+							// if( self % 2 ){
+							// 	continue;
+							// }
+							n++;
+							edges.push({
+								data:{
+									id: 'e'+n,
+									source: sNode['cid'],
+									target: self
+								}
+							});
+						}
+					}
+				}
+			}
+			console.log( nodes );
+			cy.add( nodes );
+			cy.add( edges );
+			re();
+		}
+
+		function re(){
+			cy.layout( {
+					name: 'preset',
+					fit: true,
+					animate: true,
+					padding:30
+				});
+		}
+	</script>
+</html>
