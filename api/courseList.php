@@ -15,7 +15,7 @@
 		$classes = []; //班级
 		while( $course = $result->fetch_assoc( ) ){
 
-			if( !isset( $classes[$course['classname']] ) ){
+			if( !isset( $classes[$course['college']][$course['classname']] ) ){
 				if( !isset( $colleges[ $course['college'] ] ) ){
 					$college = [
 						'cid' => $course['college'],
@@ -29,15 +29,15 @@
 				}
 
 				$class = [
-					'cid' => $course['classname'],
+					'cid' => $course['classname'].$course['college'],
 					'name' => $course['classname'],
 					'parentName'=> $course['college']
 				];
 				$courses[] = $class;
-				$classes[$course['classname']] = true;
+				$classes[$course['college']][$course['classname']] = true;
 
 			}
-			$course['parentName'] = $course['classname'];
+			$course['parentName'] = $course['classname'].$course['college'];
 			$course['name'] = '('.$course['cid'].')'.$course['classname'];
 			$course['binTimes'] = explode(',', $course['courseTimeBin']);
 			$courses[] = $course;
