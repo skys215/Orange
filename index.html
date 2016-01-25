@@ -151,7 +151,7 @@
 		//start to generate
 		//todo:: sort by my algo!!done
 		//todo:: add courses to graph!!done
-		//todo:: add courses only if time is not conflict
+		//todo:: add courses only if time is not conflict !! done
 		//todo:: wright backtrace dfs algo( find all posible paths )
 		//
 		function arrangeForMinEdges( courses ){
@@ -228,9 +228,9 @@
 							var sNode = courses[k-1].children[m];
 							var self = classs['cid'];
 							// 判断时间冲不冲突
-							// if( self % 2 ){
-							// 	continue;
-							// }
+							if( !checkTimeConflict(classs['courseTimeBin'], sNode['courseTimeBin']) ){
+								continue;
+							}
 							n++;
 							edges.push({
 								data:{
@@ -243,6 +243,18 @@
 					}
 				}
 			}
+
+			function checkTimeConflict( class1, class2 ){
+				class1 = class1.split(',');
+				class2 = class2.split(',');
+
+				for( var i in class1 ){
+					if( Number(class1[i]) & Number(class2[i]) ){
+						return false;
+					}
+				}
+				return true;
+			}
 			console.log( nodes );
 			cy.add( nodes );
 			cy.add( edges );
@@ -251,11 +263,11 @@
 
 		function re(){
 			cy.layout( {
-					name: 'preset',
-					fit: true,
-					animate: true,
-					padding:30
-				});
+				name: 'preset',
+				fit: true,
+				animate: true,
+				padding:30
+			});
 		}
 	</script>
 </html>
