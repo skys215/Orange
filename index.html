@@ -37,7 +37,7 @@
 				return false;
 			}
 
-			parentNode = slctdTree.getNodeByParam( 'cid', nodes.classname );
+			parentNode = slctdTree.getNodeByParam( 'cid', nodes.classname+nodes.college );
 			//if parent doesn't exists, add parent node
 			if( !parentNode ){
 				parentNode = slctdTree.copyNode( null, nodes.getParentNode() );
@@ -105,6 +105,7 @@
 					}
 			}, []);
 			$('#start_arrange').on('click', function(){
+				cy.remove('*');
 				var courses = slctdTree.getNodesByParam('isParent', true);
 				courses = arrangeForMinEdges( courses );
 				addNodesToCytoFromZTree( courses );
@@ -151,6 +152,7 @@
 		//start to generate
 		//todo:: sort by my algo!!done
 		//todo:: add courses to graph!!done
+		//todo:: remove node that has no conection with any node with parent node
 		//todo:: add courses only if time is not conflict !! done
 		//todo:: wright backtrace dfs algo( find all posible paths )
 		//
