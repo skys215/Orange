@@ -113,7 +113,7 @@
 			});
 		});
 	</script>
-	<script type="text/javascript" src="js/cytoscape.min.js"></script>
+	<script type="text/javascript" src="js/cytoscape.js"></script>
 	<script type="text/javascript">
 		var cy = cytoscape({
 			container: document.getElementById('graphs'),
@@ -196,6 +196,7 @@
 			}
 			return sortedCourses;
 		}
+
 		function addNodesToCytoFromZTree( courses ){
 			var n = 0;
 			var nodes = [];
@@ -270,6 +271,18 @@
 				animate: true,
 				padding:30
 			});
+		}
+
+		function getTimeSchedule( ){
+			var startNode = cy.$( 'nodes[courseName="中国历史概论"]' )[0];
+			var startNodes = startNode.children();
+			var startNodeLength = strartNodes.length;
+
+			var i = 0;
+			for( i = 0; i < startNodeLength; i++ ){
+
+			}
+
 		}
 	</script>
 </html>
