@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 	<head>
-		<meta charset="urf-8" />
+		<meta charset="utf-8" />
 		<title>Course</title>
 	</head>
 	<style>
@@ -13,13 +13,29 @@
 			width: 300px;
 			overflow: auto;
 		}
+		#timetables{
+			background-color: rgba(255,255,255,0.6);
+		}
+		ul.schedule{
+			background-color: rgba(255,255,30, 0.6);
+			padding: 0 20px;
+		}
+		#timetables li{
+			list-style-type: circle;
+			list-style-position: inside;
+		}
+		li.schedule-case{
+			padding: 10px;
+			list-style-type: square;
+			list-style-position: inside;
+		}
 	</style>
 	<body>
 		<ul id="all_course_list" class="ztree"></ul>
 		<ul id="selected_course_list" class="ztree"></ul>
-		<button id="draw">1. Draw!</button>
-		<button id="start_arrange">2. Start!</button>
+		<button id="start_arrange">Start!</button>
 		<div id="graphs"></div>
+		<ul id="timetables"></ul>
 	</body>
 	<link rel="stylesheet" type="text/css" href="css/demo.css">
 	<link rel="stylesheet" type="text/css" href="css/zTreeStyle/zTreeStyle.css">
@@ -105,15 +121,13 @@
 						}
 					}
 			}, []);
-			$('#draw').on('click', function(){
+			$('#start_arrange').on('click', function(){
 				cy.remove('*');
 				var courses = slctdTree.getNodesByParam('isParent', true);
 				courses = arrangeForMinEdges( courses );
 				addNodesToCytoFromZTree( courses );
-				window.scrollTo(0, 100000);
-			});
-			$('#start_arrange').on('click', function(){
 				getTimeSchedule();
+				showTimetables( possibleSchedules );
 			})
 		});
 	</script>
@@ -161,7 +175,7 @@
 		//todo:: add courses only if time is not conflict !! done
 		//todo:: wright backtrace dfs algo( find all posible paths )!! done
 		//
-		//todo:: list possible timetables
+		//todo:: list possible timetables!!done
 		//todo:: draw timetable
 		//
 		function arrangeForMinEdges( courses ){
@@ -228,7 +242,8 @@
 					nodes.push({
 						data:{
 							id: classs['cid'],
-							parent: course['tId']
+							parent: course['tId'],
+							courseName: course['name']
 						},
 						position:{ x: 30*(j+1), y: (k+1)*30 }
 					});
@@ -314,7 +329,25 @@
 				possibleSchedules.push( Q.slice() );
 			}
 			Q.pop( );
+		}
 
+		function showTimetables( possibleSchedules ){
+			var ttList = $('#timetables');
+			ttList.empty();
+			for( var i in possibleSchedules ){
+				var schedule = possibleSchedules[i];
+				var num = Number(i)+1;
+				var prntLi = $('<li>').attr({'class':'schedule-case'}).text('方案'+num);
+				var ul = $('<ul>').attr({'class':'schedule'});
+				for( var k in schedule ){
+					var course = schedule[k];
+					var data = course.data();
+					var li = $('<li>').attr({'class':'schedule-course'}).text(data['courseName']+data['id']);
+					ul.append( li );
+				}
+				prntLi.append( ul );
+				ttList.append( prntLi );
+			}
 		}
 	</script>
 </html>
