@@ -58,8 +58,8 @@
 			}
 			else{
 				slctdTree.removeNode( n );
-				parentNode = slctdTree.getNodeByParam( 'cid', nodes.classname );
-				if( !parentNode.children.length ){  //has bug
+				parentNode = slctdTree.getNodeByParam( 'cid', n.parentName );
+				if( !parentNode.children.length ){
 					slctdTree.removeNode( parentNode );
 				}
 			}
@@ -152,13 +152,17 @@
 		//todo:: select few course for test!!done
 		//todo:: make course selectable(ztree)!!done
 		//todo:: 不同学院开的课不要放在一起!!done
+		//todo:: add search for course
 		//
 		//start to generate
 		//todo:: sort by my algo!!done
 		//todo:: add courses to graph!!done
-		//todo:: remove node that has no conection with any node with parent node
+		//todo:: remove node that has no conection with any node with parent node ?
 		//todo:: add courses only if time is not conflict !! done
-		//todo:: wright backtrace dfs algo( find all posible paths )
+		//todo:: wright backtrace dfs algo( find all posible paths )!! done
+		//
+		//todo:: list possible timetables
+		//todo:: draw timetable
 		//
 		function arrangeForMinEdges( courses ){
 			var arrangedCourses = [];
