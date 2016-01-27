@@ -17,7 +17,8 @@
 	<body>
 		<ul id="all_course_list" class="ztree"></ul>
 		<ul id="selected_course_list" class="ztree"></ul>
-		<button id="start_arrange">Start!</button>
+		<button id="draw">1. Draw!</button>
+		<button id="start_arrange">2. Start!</button>
 		<div id="graphs"></div>
 	</body>
 	<link rel="stylesheet" type="text/css" href="css/demo.css">
@@ -58,7 +59,7 @@
 			else{
 				slctdTree.removeNode( n );
 				parentNode = slctdTree.getNodeByParam( 'cid', nodes.classname );
-				if( !parentNode.children.length ){
+				if( !parentNode.children.length ){  //has bug
 					slctdTree.removeNode( parentNode );
 				}
 			}
@@ -104,16 +105,19 @@
 						}
 					}
 			}, []);
-			$('#start_arrange').on('click', function(){
+			$('#draw').on('click', function(){
 				cy.remove('*');
 				var courses = slctdTree.getNodesByParam('isParent', true);
 				courses = arrangeForMinEdges( courses );
 				addNodesToCytoFromZTree( courses );
 				window.scrollTo(0, 100000);
 			});
+			$('#start_arrange').on('click', function(){
+				getTimeSchedule();
+			})
 		});
 	</script>
-	<script type="text/javascript" src="js/cytoscape.js"></script>
+	<script type="text/javascript" src="js/cytoscape.min.js"></script>
 	<script type="text/javascript">
 		var cy = cytoscape({
 			container: document.getElementById('graphs'),
@@ -273,15 +277,39 @@
 			});
 		}
 
+		var Q;
+		var possibleSchedules;
+		var courseAmount;
 		function getTimeSchedule( ){
-			var startNode = cy.$( 'nodes[courseName="中国历史概论"]' )[0];
+			Q = [];
+			possibleSchedules = [];
+			var parentNodes = cy.filter('node:parent')
+			var startNode = parentNodes[0];
 			var startNodes = startNode.children();
-			var startNodeLength = strartNodes.length;
+			var startNodeLength = startNodes.length;
+			courseAmount = parentNodes.length;
 
 			var i = 0;
 			for( i = 0; i < startNodeLength; i++ ){
-
+				addNextClass( startNodes[i] );
 			}
+			alert('done');
+			console.log( possibleSchedules );
+		}
+
+		function addNextClass( classNode ){
+			Q.push( classNode );
+
+			var childrens = classNode.outgoers('node');
+			var childrenAmount = childrens.length;
+			for( var i=0; i < childrenAmount; i++ ){
+				addNextClass( childrens[i] );
+			}
+
+			if( Q.length == courseAmount ){
+				possibleSchedules.push( Q.slice() );
+			}
+			Q.pop( );
 
 		}
 	</script>
