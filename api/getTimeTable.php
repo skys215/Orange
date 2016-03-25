@@ -28,3 +28,32 @@
 		$whereSing = implode();
 		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).
 	}
+
+
+	// SELECT *
+	// FROM(
+	// 	SELECT id,
+	// 	          group_concat(cid),
+	// 	          classname,
+	// 	          classroom,
+	// 	          courseTimeSing,
+	// 	          courseTimeDoub
+	// 	   FROM courseinfo2
+	// 	   WHERE cid in(1900640020,1900640005)
+	//    ) AS a,(
+	// 	   SELECT id,
+	// 	          group_concat(cid),
+	// 	          classname,
+	// 	          classroom,
+	// 	          courseTimeSing,
+	// 	          courseTimeDoub
+	// 	   FROM courseinfo2
+	// 	   WHERE cid in(0803900002, 0803900001)
+	//    ) AS b
+	// WHERE (
+	// 	(a.courseTimeSing & b.courseTimeSing)
+	//     AND (a.courseTimeDoub & b.courseTimeDoub)
+	// )=0
+	//
+	// 只返回课表（组合）cid可以为数组
+	// 前端获取后，从local storage获取课程信息，还有显示课程选择列表
