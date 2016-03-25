@@ -1,5 +1,6 @@
 <?php
-	function getCourseList( $_mysqli ){
+	function getCourseList(){
+		global $_mysqli;
 		$sql = "SELECT * FROM courseinfo WHERE classname NOT LIKE '%毕业%' AND term=".TERM;
 		$result = $_mysqli->query( $sql );
 
