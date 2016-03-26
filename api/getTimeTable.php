@@ -39,12 +39,18 @@
 			$timetable = array_chunk( $timetable, 3 );
 			$cids[$i] = [];
 			foreach( $timetable as $val ){
-				$cids[$i][] = $val[0];
+				$sql = 'SELECT * FROM courseinfo2 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
+				$query = $_mysqli->query( $sql );
+				while( $courseinfo = $query->fetch_assoc() ){
+					$cids[$i][] = $courseinfo;
+				}
 			}
 			$i++;
 		}
 
-		return $cids;
+		$result = [];
+		$result['timetables'] = $cids;
+		return $result;
 	}
 
 

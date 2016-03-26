@@ -4,10 +4,6 @@
 		<title>Course</title>
 	</head>
 	<style>
-		#graphs{
-			outline: 3px solid lime;
-			height: 300px;
-		}
 		ul.ztree{
 			display: inline-block;
 			width: 300px;
@@ -34,7 +30,6 @@
 		<ul id="all_course_list" class="ztree"></ul>
 		<ul id="selected_course_list" class="ztree"></ul>
 		<button id="start_arrange">Start!</button>
-		<div id="graphs"></div>
 		<ul id="timetables"></ul>
 	</body>
 	<link rel="stylesheet" type="text/css" href="css/demo.css">
@@ -122,229 +117,51 @@
 					}
 			}, []);
 			$('#start_arrange').on('click', function(){
-				cy.remove('*');
-				var courses = slctdTree.getNodesByParam('isParent', true);
-				courses = arrangeForMinEdges( courses );
-				addNodesToCytoFromZTree( courses );
-				getTimeSchedule();
-				showTimetables( possibleSchedules );
+				var courses = JSON.stringify(getSelectedCIds());
+				var data = {
+					'action' : 'get_time_table',
+					'courses': courses
+				};
+				$.get('api.php', data, function( result ){
+					result = JSON.parse(result);
+					showTimetables( result['timetables'] );
+				});
 			})
 		});
-	</script>
-	<script type="text/javascript" src="js/cytoscape.min.js"></script>
-	<script type="text/javascript">
-		var cy = cytoscape({
-			container: document.getElementById('graphs'),
-			style: cytoscape.stylesheet()
-				.selector('node')
-				  .css({
-				    'content': 'data(courseName)',
-				    'background-color': '#eee'
-				  })
-				.selector('node > node')
-				  .css({
-				    'content': 'data(id)',
-				    'background-color': '#999'
-				  })
-				.selector('edge')
-				  .css({
-				    'target-arrow-shape': 'triangle',
-				    'width': 4,
-				    'line-color': '#ddd',
-				    'target-arrow-color': '#ddd'
-				  })
-				.selector('.highlighted')
-				  .css({
-				    'background-color': '#61bffc',
-				    'line-color': '#61bffc',
-				    'target-arrow-color': '#61bffc',
-				    'transition-property': 'background-color, line-color, target-arrow-color',
-				    'transition-duration': '0.5s'
-				  })
-		});
-		//todo:: get course from db !!done
-		//todo:: select few course for test!!done
-		//todo:: make course selectable(ztree)!!done
-		//todo:: 不同学院开的课不要放在一起!!done
-		//todo:: add search for course
-		//
-		//start to generate
-		//todo:: sort by my algo!!done
-		//todo:: add courses to graph!!done
-		//todo:: remove node that has no conection with any node with parent node ?
-		//todo:: add courses only if time is not conflict !! done
-		//todo:: wright backtrace dfs algo( find all posible paths )!! done
-		//
-		//todo:: list possible timetables!!done
-		//todo:: draw timetable
-		//
-		function arrangeForMinEdges( courses ){
-			var arrangedCourses = [];
-			var indicies = [ -1 ]; //init
-			var sortedCourses = [];
-			var courseAmount = courses.length;
 
-			courses.sort(function( a, b ){
-				if( a.children.length < b.children.length ){
-					return -1
-				}
-				if( a.children.length > b.children.length ){
-					return 1;
-				}
-				return 0;
-			});
-
-			for( var i = 0; i < courseAmount; i++ ){
-				var plusminus = Math.pow( -1, (i*(i+1))/2 );
-				var amount = Math.pow( i, i%2 );
-				var index = indicies[ indicies.length - 1 ] + plusminus * amount;
-				indicies.push( index );
-
-				var pos = i*Math.pow( 0, i%2 );
-				if( index < 0 ){
-					index += courseAmount;
-				}
-				//append
-				if( pos ){
-					arrangedCourses.push( index );
-				}
-				else{ //prepend
-					arrangedCourses.unshift( index );
-				}
-			}
-
-			for( var i in arrangedCourses ){
-				sortedCourses.push( courses[arrangedCourses[i]] );
-			}
-			return sortedCourses;
-		}
-
-		function addNodesToCytoFromZTree( courses ){
-			var n = 0;
-			var nodes = [];
-			var edges = [];
-
-			for( var k in courses ){
-				var course = courses[k];
-				//supernode (aka, node group)
-				nodes.push({
-					data: {
-						id: course['tId'],
-						courseName: course['name']
-					}
-				});
-
-
-				//classes node
-				var classes = course.children;
-				for( var j in classes ){
-					var classs = classes[j];
-					nodes.push({
-						data:{
-							id: classs['cid'],
-							parent: course['tId'],
-							courseName: course['name']
-						},
-						position:{ x: 30*(j+1), y: (k+1)*30 }
-					});
-
-					// 第二个课程要与第一个课程建立边
-					if( k > 0 ){
-						for( var m in courses[k-1].children ){
-							var sNode = courses[k-1].children[m];
-							var self = classs['cid'];
-							// 判断时间冲不冲突
-							if( !checkTimeConflict(classs['courseTimeBin'], sNode['courseTimeBin']) ){
-								continue;
-							}
-							n++;
-							edges.push({
-								data:{
-									id: 'e'+n,
-									source: sNode['cid'],
-									target: self
-								}
-							});
-						}
-					}
-				}
-			}
-
-			function checkTimeConflict( class1, class2 ){
-				class1 = class1.split(',');
-				class2 = class2.split(',');
-
-				for( var i in class1 ){
-					if( Number(class1[i]) & Number(class2[i]) ){
-						return false;
-					}
-				}
-				return true;
-			}
-			console.log( nodes );
-			cy.add( nodes );
-			cy.add( edges );
-			re();
-		}
-
-		function re(){
-			cy.layout( {
-				name: 'preset',
-				fit: true,
-				animate: true,
-				padding:30
-			});
-		}
-
-		var Q;
-		var possibleSchedules;
-		var courseAmount;
-		function getTimeSchedule( ){
-			Q = [];
-			possibleSchedules = [];
-			var parentNodes = cy.filter('node:parent')
-			var startNode = parentNodes[0];
-			var startNodes = startNode.children();
-			var startNodeLength = startNodes.length;
-			courseAmount = parentNodes.length;
-
+		function getSelectedCIds( ){
+			var courses = slctdTree.getNodesByParam('isParent', true);
+			var courseIds = [];
 			var i = 0;
-			for( i = 0; i < startNodeLength; i++ ){
-				addNextClass( startNodes[i] );
+			for( var parentNodeNum in courses ){
+				courseIds[i] = [];
+				var classes = courses[parentNodeNum].children;
+				for( var classNum in classes ){
+					courseIds[i].push( classes[classNum].cid );
+				}
+				i++;
 			}
-			alert('done');
-			console.log( possibleSchedules );
-		}
-
-		function addNextClass( classNode ){
-			Q.push( classNode );
-
-			var childrens = classNode.outgoers('node');
-			var childrenAmount = childrens.length;
-			for( var i=0; i < childrenAmount; i++ ){
-				addNextClass( childrens[i] );
-			}
-
-			if( Q.length == courseAmount ){
-				possibleSchedules.push( Q.slice() );
-			}
-			Q.pop( );
+			return courseIds;
 		}
 
 		function showTimetables( possibleSchedules ){
 			var ttList = $('#timetables');
+			if( !possibleSchedules.length ){
+				alert('no timetable matched');
+				return false;
+			}
 			ttList.empty();
+			var num = 1;
 			for( var i in possibleSchedules ){
 				var schedule = possibleSchedules[i];
-				var num = Number(i)+1;
 				var prntLi = $('<li>').attr({'class':'schedule-case'}).text('方案'+num);
 				var ul = $('<ul>').attr({'class':'schedule'});
 				for( var k in schedule ){
 					var course = schedule[k];
-					var data = course.data();
-					var li = $('<li>').attr({'class':'schedule-course'}).text(data['courseName']+data['id']);
+					var li = $('<li>').attr({'class':'schedule-course'}).text(course['classname']+course['cid']+'('+course['classroom']+')');
 					ul.append( li );
 				}
+				num++;
 				prntLi.append( ul );
 				ttList.append( prntLi );
 			}
