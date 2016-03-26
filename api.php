@@ -10,6 +10,10 @@
 			include( 'api/courseList.php' );
 			$data = getCourseList( $_mysqli );
 			break;
+		case 'get_time_table':
+			include( 'api/getTimeTable.php' );
+			$data = getTimeTable( $_GET['courses'] );
+			break;
 		default:
 
 			break;

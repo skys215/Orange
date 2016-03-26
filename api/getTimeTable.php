@@ -3,8 +3,8 @@
 	function getTimeTable( $courses ){
 		global $_mysqli;
 
+		$courses = json_decode( $courses, true );
 		$tables = [];
-		$courses = [];
 		//优化:先筛选上课时间重复的
 		//从用户选择的课程中，获取上课时间不同的课程
 		// foreach( $courses as $classname => $courseIds ){
@@ -20,13 +20,24 @@
 		$chars = str_split( $chars );
 		$i = 0;
 		foreach( $courses as $classname => $courseIds ){
-			$tables[] = '( SELECT cid, classname, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in() ) as '.$chars[$i];
+			$tables[] = '( SELECT cid, classname, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in(\''.implode("','", $courseIds).'\') ) as '.$chars[$i];
 			$i++;
 		}
 
 		$whereClause = [];
-		$whereSing = implode();
-		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).
+		$courseChars = array_slice($chars, 0, $i);
+		$whereSing = '('.implode('.courseTimeSing & ', $courseChars ) . '.courseTimeSing)';
+		$whereDoub = '('.implode('.courseTimeDoub & ', $courseChars ) . '.courseTimeDoub)';
+		$whereClause[] = '('.$whereSing.' AND '.$whereDoub.') = 0';
+		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
+
+		$query = $_mysqli->query( $finalSql );
+		$timeTables = [];
+		while( $timeTables[] = $query->fetch_row() ){
+
+		}
+
+		return $timeTables;
 	}
 
 
