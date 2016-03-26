@@ -20,7 +20,7 @@
 		$chars = str_split( $chars );
 		$i = 0;
 		foreach( $courses as $classname => $courseIds ){
-			$tables[] = '( SELECT cid, classname, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in(\''.implode("','", $courseIds).'\') ) as '.$chars[$i];
+			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in(\''.implode("','", $courseIds).'\') ) as '.$chars[$i];
 			$i++;
 		}
 
@@ -33,11 +33,18 @@
 
 		$query = $_mysqli->query( $finalSql );
 		$timeTables = [];
-		while( $timeTables[] = $query->fetch_row() ){
-
+		$cids = [];
+		$i = 0;
+		while( $timetable = $query->fetch_row() ){
+			$timetable = array_chunk( $timetable, 3 );
+			$cids[$i] = [];
+			foreach( $timetable as $val ){
+				$cids[$i][] = $val[0];
+			}
+			$i++;
 		}
 
-		return $timeTables;
+		return $cids;
 	}
 
 
