@@ -39,9 +39,9 @@
 			$timetable = array_chunk( $timetable, 3 );
 			$cids[$i] = [];
 			foreach( $timetable as $val ){
-				$sql = 'SELECT * FROM courseinfo2 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
-				$query = $_mysqli->query( $sql );
-				while( $courseinfo = $query->fetch_assoc() ){
+				$courseSql = 'SELECT * FROM courseinfo2 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
+				$courseQuery = $_mysqli->query( $courseSql );
+				while( $courseinfo = $courseQuery->fetch_assoc() ){
 					$cids[$i][] = $courseinfo;
 				}
 			}
