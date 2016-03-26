@@ -5,47 +5,60 @@
 
 		$courses = json_decode( $courses, true );
 		$tables = [];
-		//优化:先筛选上课时间重复的
-		//从用户选择的课程中，获取上课时间不同的课程
-		// foreach( $courses as $classname => $courseIds ){
-		// 	$sql = 'SELECT cid FROM courseinfo2 WHERE cid in (\''.implode('\',\'', $courseIds ).'\') GROUP BY courseTImeSing, courseTimeDoub ORDER BY cid';
-		// 	$query = $_mysqli->query( $sql );
-		// 	$courses[$classname] = [];
-		// 	foreach( $assoc = $query->fetch_assoc() ){
-		// 		$courses[$classname][] = $assoc['cid'];
-		// 	}
-		// }
-
 		$chars = 'abcdefghijklmnopqrstuvwxyz';
 		$chars = str_split( $chars );
 		$i = 0;
 		foreach( $courses as $classname => $courseIds ){
-			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in(\''.implode("','", $courseIds).'\') ) as '.$chars[$i];
+			//优化:先筛选上课时间重复的
+			//从用户选择的课程中，获取上课时间不同的课程
+			$sql = 'SELECT cid FROM courseinfo2 WHERE cid in(\''.implode("','", $courseIds).'\') AND term='.TERM.' GROUP BY courseTimeSing, courseTimeDoub';
+			$query = $_mysqli->query( $sql );
+			$distinctTimeCids = [];
+			while( $class = $query->fetch_assoc() ){
+				$distinctTimeCids[] = $class['cid'];
+			}
+			$query->free();
+			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in(\''.implode("','", $distinctTimeCids).'\') AND term='.TERM.') as '.$chars[$i];
 			$i++;
 		}
+
+
 
 		$whereClause = [];
 		$courseChars = array_slice($chars, 0, $i);
 		$whereSing = '('.implode('.courseTimeSing & ', $courseChars ) . '.courseTimeSing)';
 		$whereDoub = '('.implode('.courseTimeDoub & ', $courseChars ) . '.courseTimeDoub)';
 		$whereClause[] = '('.$whereSing.' AND '.$whereDoub.') = 0';
-		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
 
-		$query = $_mysqli->query( $finalSql );
+
 		$timeTables = [];
 		$cids = [];
 		$i = 0;
-		while( $timetable = $query->fetch_row() ){
-			$timetable = array_chunk( $timetable, 3 );
-			$cids[$i] = [];
-			foreach( $timetable as $val ){
-				$courseSql = 'SELECT * FROM courseinfo2 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
-				$courseQuery = $_mysqli->query( $courseSql );
-				while( $courseinfo = $courseQuery->fetch_assoc() ){
-					$cids[$i][] = $courseinfo;
+		$page = 0;
+		$size = 500;
+
+		$countSql = 'SELECT COUNT(a.cid) as c FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
+		$countQuery = $_mysqli->query( $countSql );
+		$countResult = $countQuery->fetch_row();
+		$rows = $countResult[0];
+
+		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
+
+		for( $page = 0; $page<=$row/$size; $page++ ){
+			$query = $_mysqli->query( $finalSql.' LIMIT '.$size.' OFFSET '.($page*$size) );
+			while( $timetable = $query->fetch_row() ){
+				$timetable = array_chunk( $timetable, 3 );
+				$cids[$i] = [];
+				foreach( $timetable as $val ){
+					$courseSql = 'SELECT * FROM courseinfo2 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
+					$courseQuery = $_mysqli->query( $courseSql );
+					while( $courseinfo = $courseQuery->fetch_assoc() ){
+						$cids[$i][] = $courseinfo;
+					}
+					$courseQuery->free();
 				}
+				$i++;
 			}
-			$i++;
 		}
 
 		$result = [];
