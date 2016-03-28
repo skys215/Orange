@@ -11,14 +11,14 @@
 		foreach( $courses as $classname => $courseIds ){
 			//优化:先筛选上课时间重复的
 			//从用户选择的课程中，获取上课时间不同的课程
-			$sql = 'SELECT cid FROM courseinfo2 WHERE cid in(\''.implode("','", $courseIds).'\') AND term='.TERM.' GROUP BY courseTimeSing, courseTimeDoub';
+			$sql = 'SELECT cid FROM courseinfo3 WHERE cid in(\''.implode("','", $courseIds).'\') AND term='.TERM.' GROUP BY courseTimeSing, courseTimeDoub,courseTimeNght';
 			$query = $_mysqli->query( $sql );
 			$distinctTimeCids = [];
 			while( $class = $query->fetch_assoc() ){
 				$distinctTimeCids[] = $class['cid'];
 			}
 			$query->free();
-			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub FROM courseinfo2 WHERE cid in(\''.implode("','", $distinctTimeCids).'\') AND term='.TERM.') as '.$chars[$i];
+			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub, courseTimeNght FROM courseinfo3 WHERE cid in(\''.implode("','", $distinctTimeCids).'\') AND term='.TERM.') as '.$chars[$i];
 			$i++;
 		}
 
@@ -28,7 +28,8 @@
 		$courseChars = array_slice($chars, 0, $i);
 		$whereSing = '('.implode('.courseTimeSing & ', $courseChars ) . '.courseTimeSing)';
 		$whereDoub = '('.implode('.courseTimeDoub & ', $courseChars ) . '.courseTimeDoub)';
-		$whereClause[] = '('.$whereSing.' AND '.$whereDoub.') = 0';
+		$whereNght = '('.implode('.courseTimeNght & ', $courseChars ) . '.courseTimeNght)';
+		$whereClause[] = '('.$whereSing.' & '.$whereDoub.' & '.$whereNght.') = 0';
 
 
 		$timeTables = [];
@@ -47,10 +48,10 @@
 		for( $page = 0; $page<=$row/$size; $page++ ){
 			$query = $_mysqli->query( $finalSql.' LIMIT '.$size.' OFFSET '.($page*$size) );
 			while( $timetable = $query->fetch_row() ){
-				$timetable = array_chunk( $timetable, 3 );
+				$timetable = array_chunk( $timetable, 4 );
 				$cids[$i] = [];
 				foreach( $timetable as $val ){
-					$courseSql = 'SELECT * FROM courseinfo2 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
+					$courseSql = 'SELECT * FROM courseinfo3 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
 					$courseQuery = $_mysqli->query( $courseSql );
 					while( $courseinfo = $courseQuery->fetch_assoc() ){
 						$cids[$i][] = $courseinfo;
@@ -75,7 +76,7 @@
 	// 	          classroom,
 	// 	          courseTimeSing,
 	// 	          courseTimeDoub
-	// 	   FROM courseinfo2
+	// 	   FROM courseinfo3
 	// 	   WHERE cid in(1900640020,1900640005)
 	//    ) AS a,(
 	// 	   SELECT id,
@@ -84,7 +85,7 @@
 	// 	          classroom,
 	// 	          courseTimeSing,
 	// 	          courseTimeDoub
-	// 	   FROM courseinfo2
+	// 	   FROM courseinfo3
 	// 	   WHERE cid in(0803900002, 0803900001)
 	//    ) AS b
 	// WHERE (
