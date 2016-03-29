@@ -29,7 +29,7 @@
 		$whereSing = '('.implode('.courseTimeSing & ', $courseChars ) . '.courseTimeSing)';
 		$whereDoub = '('.implode('.courseTimeDoub & ', $courseChars ) . '.courseTimeDoub)';
 		$whereNght = '('.implode('.courseTimeNght & ', $courseChars ) . '.courseTimeNght)';
-		$whereClause[] = '('.$whereSing.' & '.$whereDoub.' & '.$whereNght.') = 0';
+		$whereClause[] = '(('.$whereSing.' | '.$whereDoub.' | '.$whereNght.')) = 0';
 
 
 		$timeTables = [];
