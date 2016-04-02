@@ -4,9 +4,35 @@
 		<title>Course</title>
 	</head>
 	<style>
-		ul.ztree{
-			display: inline-block;
+		*{
+			box-sizing: content-box;
+			padding: 0;
+			margin: 0 auto;
+			font-family: "Microsoft Yahei UI","Microsoft YaHei",Helvetica,Arial,sans-serif;
+		}
+		.container{
+			width: 980px;
+		}
+		.container div{
+			outline: 1px solid lime;
+		}
+		.left{
 			width: 300px;
+			float:left;
+		}
+		.right{
+			margin-left: 300px;
+		}
+		#selectPage{
+			background: khaki;
+			padding: 0 auto;
+			margin: auto 0;
+		}
+		#selectPage div{
+			display: inline-block;
+		}
+		ul.ztree{
+			height: 80vh;
 			overflow: auto;
 		}
 		#timetables{
@@ -25,14 +51,173 @@
 			list-style-type: square;
 			list-style-position: inside;
 		}
+
+		#suggestions{
+			position: absolute;
+			margin: 0;
+			padding: 0;
+
+			background-color: salmon;
+			box-shadow: 0px 3px 3px rgba(0,0,0,0.3);
+			width: 500px;
+			max-height: 80vh;
+			margin-top: 20px;
+			text-align: left;
+			overflow: auto;
+		}
+		#suggestions:empty{
+			display:none;
+		}
+		#suggestions li{
+			padding: 12px;
+			border-top: 1px solid lightgray;
+			border-bottom: 1px solid lightgray;
+		}
+		.highlighted{
+			background-color: yellow;
+		}
 	</style>
 	<body>
-		<ul id="all_course_list" class="ztree"></ul>
-		<ul id="selected_course_list" class="ztree"></ul>
-		<button id="start_arrange">Start!</button>
-		<ul id="timetables"></ul>
+		<div class="container">
+			<div id="selected_course" class="left">
+				<div>
+					<ul id="suggestions"></ul>
+					<input type="text" placeholder="搜索课程" id="keyword"/>
+				</div>
+				<div>已选课程：<button id="start_arrange">Start!</button></div>
+				<ul id="selected_course_list" class="ztree"></ul>
+			</div>
+			<div id="resultPage" class="right">
+				<table id="timetables">
+					<thead>
+					<tr>
+						<td>-</td>
+						<td>星期一</td>
+						<td>星期二</td>
+						<td>星期三</td>
+						<td>星期四</td>
+						<td>星期五</td>
+					</tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td>1</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>4</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>中午休息</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>5</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>6</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>7</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>8</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>5:30-7:00</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>9</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>10</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>11</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>12</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</body>
-	<link rel="stylesheet" type="text/css" href="css/demo.css">
+	<!-- <link rel="stylesheet" type="text/css" href="css/demo.css"> -->
 	<link rel="stylesheet" type="text/css" href="css/zTreeStyle/zTreeStyle.css">
 	<script type="text/javascript" src="js/jquery-1.12.0.min.js"></script>
 	<script type="text/javascript" src="js/ztree/jquery.ztree.all-3.5.min.js"></script>
@@ -76,37 +261,46 @@
 			}
 		}
 
+		function addNode( ){
+			var ele = ul.find('li.highlighted');
+			ul.empty();
+
+			var parentNode;
+			var cid = ele.attr('data-cid');
+			var college = ele.attr('data-college');
+			var classname = ele.attr('data-classname');
+			var classroom = ele.attr('data-classroom');
+			var mainclass = ele.attr('data-mainclass');
+			var classteacher = ele.attr('data-classteacher');
+
+
+			parentNode = slctdTree.getNodeByParam( 'cid', classname+college );
+			//if parent doesn't exists, add parent node
+			if( !parentNode ){
+				var pNode = {
+					"cid": classname+college,
+					"name": classname,
+					"nocheck": true
+				}
+				parentNode = slctdTree.addNodes( null, -1, pNode );
+				parentNode = parentNode[0];
+			}
+			var sameNode = slctdTree.getNodeByParam( 'id', cid );
+			if( sameNode ){
+				return;
+			}
+			var node = {
+				"id": cid,
+				"name": classname+'('+cid+')',
+				"parentName": classname,
+				"cid": classname+college
+			}
+			// append node to parent node
+			slctdTree.addNodes( parentNode, -1, node );
+			// done
+		}
+
 		$(document).ready(function(){
-			$.get('api.php',{action:'course_list'}, function( data ){
-				var courseNodes = $.parseJSON( data );
-				coursesTree = $.fn.zTree.init(
-					$("#all_course_list"),
-					{
-						data: {
-							simpleData: {
-								enable: true,
-								idKey: 'cid',
-								pIdKey: 'parentName'
-							}
-						},
-						check:{
-							enable: true,
-							autoCheckTrigger: false
-						},
-						callback: {
-							onCheck:function(e, treeId, treeNode){
-								if( treeNode.checked ){
-									addNodeToSelected( treeNode );
-								}
-								else{
-									removeNodeFromSelected( treeNode );
-								}
-							}
-						}
-					},
-					courseNodes
-				);
-			});
 			slctdTree = $.fn.zTree.init($("#selected_course_list"), {
 				data: {
 						simpleData: {
@@ -114,8 +308,18 @@
 							idKey: 'cid',
 							pIdKey: 'parentName'
 						}
+					},
+				callback:{
+					onDblClick:function( event, treeId, treeNode ){
+						slctdTree.removeNode( treeNode );
 					}
+				},
+				edit: {
+					enable:true,
+					showRenameBtn: false
+				}
 			}, []);
+
 			$('#start_arrange').on('click', function(){
 				var courses = JSON.stringify(getSelectedCIds());
 				var data = {
@@ -126,8 +330,79 @@
 					result = JSON.parse(result);
 					showTimetables( result['timetables'] );
 				});
-			})
+			});
+
+			$('#keyword').on('keyup change', function( e ){
+				var t = $(this).val();
+				if( t.length <2 ){
+					ul.empty();
+					return ;
+				}
+				switch( e.keyCode ){
+					case KEY_UP:
+						e.preventDefault();
+						previousItem();
+						break;
+					case KEY_DOWN:
+						e.preventDefault();
+						nextItem();
+						break;
+					case KEY_ENTER:
+						addNode();
+					case KEY_BACKSPACE:
+						break;
+					default:
+						getResult( t );
+						break;
+				}
+			});
+			$('#keyword').on('blur', function(){
+				ul.empty();
+			});
 		});
+
+		function getResult( keyword ){
+			var d = new Date().getTime();
+			$.get('api.php', {"action":'search', 'keyword': keyword, 'd': d }, function( data ){
+				data = $.parseJSON( data );
+				ul.empty();
+
+				var lis = [];
+				for( var item in data.result ){
+					var cls = data.result[item];
+					lis.push( '<li class="sug-item" data-cid="'+cls.cid+'" data-classname="'+cls.classname+'" data-college="'+cls.college+'" data-classteacher="'+cls.classteacher+'" data-classroom="'+cls.classroom+'">'+cls.cid+'('+cls.college+'):<br />'+cls.classname+'-'+cls.classteacher+'<br />上课时间：'+cls.classroom+'</li>' );
+				}
+				totalItemNum = lis.length;
+				ul.html(lis.join("\n"));
+				ul.find('li:first-child').addClass('highlighted');
+			});
+		}
+
+		var KEY_UP = 38;
+		var KEY_DOWN = 40;
+		var KEY_ENTER = 13;
+		var KEY_BACKSPACE = 8;
+		var KEY_SPACE = 20;
+
+		var ul = $('#suggestions');
+		var crntItemNum = 0;
+		var totalItemNum = 0;
+		function previousItem(){
+			ul.find('li.highlighted').removeClass('highlighted');
+			if( crntItemNum >0 ){
+				crntItemNum--;
+				ul.find('li.sug-item:nth-child('+crntItemNum+')').addClass('highlighted');
+			}
+		}
+
+		function nextItem(){
+			ul.children('.highlighted').removeClass('highlighted');
+
+			if( crntItemNum < totalItemNum ){
+				crntItemNum++;
+			}
+			ul.find('li.sug-item:nth-child('+crntItemNum+')').addClass('highlighted');
+		}
 
 		function getSelectedCIds( ){
 			var courses = slctdTree.getNodesByParam('isParent', true);

@@ -14,6 +14,10 @@
 			include( 'api/getTimeTable.php' );
 			$data = getTimeTable( $_GET['courses'] );
 			break;
+		case 'search':
+			include( 'api/searchClass.php');
+			$data['result'] = searchClass( $_GET['keyword'] );
+			break;
 		default:
 
 			break;
