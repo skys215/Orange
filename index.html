@@ -16,6 +16,9 @@
 		.container div{
 			outline: 1px solid lime;
 		}
+		.left, .right{
+			height: 85vh;
+		}
 		.left{
 			width: 300px;
 			float:left;
@@ -35,7 +38,17 @@
 			height: 80vh;
 			overflow: auto;
 		}
+		#all_course_list{
+			display: none;
+			position:absolute;
+			margin-top: 20px;
+			margin-left: 80px;
+			background-color: lightsteelblue;
+			box-shadow: 3px 3px 3px rgba(0,0,0,0.3);
+			width: 380px;
+		}
 		#timetables{
+			width: 80%;
 			background-color: rgba(255,255,255,0.6);
 		}
 		ul.schedule{
@@ -82,26 +95,26 @@
 			<div id="selected_course" class="left">
 				<div>
 					<ul id="suggestions"></ul>
+					<ul id="all_course_list" class="ztree"></ul>
 					<input type="text" placeholder="搜索课程" id="keyword"/>
+					<a href="#" class="show_all_class">所有课程</a>
 				</div>
 				<div>已选课程：<button id="start_arrange">Start!</button></div>
 				<ul id="selected_course_list" class="ztree"></ul>
 			</div>
 			<div id="resultPage" class="right">
 				<table id="timetables">
-					<thead>
-					<tr>
-						<td>-</td>
-						<td>星期一</td>
-						<td>星期二</td>
-						<td>星期三</td>
-						<td>星期四</td>
-						<td>星期五</td>
-					</tr>
-					</thead>
 					<tbody>
 					<tr>
-						<td>1</td>
+						<td>-</td>
+						<th>星期一</th>
+						<th>星期二</th>
+						<th>星期三</th>
+						<th>星期四</th>
+						<th>星期五</th>
+					</tr>
+					<tr>
+						<th>1</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -109,7 +122,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>2</td>
+						<th>2</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -117,7 +130,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>3</td>
+						<th>3</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -125,7 +138,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>4</td>
+						<th>4</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -133,7 +146,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>中午休息</td>
+						<th>中午休息</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -141,7 +154,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>5</td>
+						<th>5</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -149,7 +162,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>6</td>
+						<th>6</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -157,7 +170,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>7</td>
+						<th>7</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -165,7 +178,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>8</td>
+						<th>8</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -173,7 +186,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>5:30-7:00</td>
+						<th>5:30-7:00</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -181,7 +194,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>9</td>
+						<th>9</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -189,7 +202,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>10</td>
+						<th>10<th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -197,7 +210,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>11</td>
+						<th>11</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -205,7 +218,7 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td>12</td>
+						<th>12</th>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -264,6 +277,7 @@
 		function addNode( ){
 			var ele = ul.find('li.highlighted');
 			ul.empty();
+			$('#keyword').val('');
 
 			var parentNode;
 			var cid = ele.attr('data-cid');
@@ -301,6 +315,36 @@
 		}
 
 		$(document).ready(function(){
+			$.get('api.php',{action:'course_list'}, function( data ){
+				var courseNodes = $.parseJSON( data );
+				coursesTree = $.fn.zTree.init(
+					$("#all_course_list"),
+					{
+						data: {
+							simpleData: {
+								enable: true,
+								idKey: 'cid',
+								pIdKey: 'parentName'
+							}
+						},
+						check:{
+							enable: true,
+							autoCheckTrigger: false
+						},
+						callback: {
+							onCheck:function(e, treeId, treeNode){
+								if( treeNode.checked ){
+									addNodeToSelected( treeNode );
+								}
+								else{
+									removeNodeFromSelected( treeNode );
+								}
+							}
+						}
+					},
+					courseNodes
+				);
+			});
 			slctdTree = $.fn.zTree.init($("#selected_course_list"), {
 				data: {
 						simpleData: {
@@ -308,10 +352,20 @@
 							idKey: 'cid',
 							pIdKey: 'parentName'
 						}
-					},
+				},
 				callback:{
-					onDblClick:function( event, treeId, treeNode ){
-						slctdTree.removeNode( treeNode );
+					beforeRemove: function( treeId, treeNode ){
+						if( treeNode.isParent == false && treeNode.getParentNode().children.length <=1 ){
+							slctdTree.removeNode( treeNode.getParentNode() );
+						}
+					},
+					onRemove:function( event, treeId, treeNode ){
+						var cTNode = coursesTree.getNodeByParam('cid', treeNode.cid);
+						if( !cTNode ){
+							return ;
+						}
+
+						coursesTree.checkNode( cTNode, false, true );
 					}
 				},
 				edit: {
@@ -319,6 +373,10 @@
 					showRenameBtn: false
 				}
 			}, []);
+
+			$('.show_all_class').on('click', function(){
+				$('#all_course_list').toggle();
+			});
 
 			$('#start_arrange').on('click', function(){
 				var courses = JSON.stringify(getSelectedCIds());
@@ -391,7 +449,11 @@
 			ul.find('li.highlighted').removeClass('highlighted');
 			if( crntItemNum >0 ){
 				crntItemNum--;
-				ul.find('li.sug-item:nth-child('+crntItemNum+')').addClass('highlighted');
+				var slctdLi = ul.find('li.sug-item:nth-child('+crntItemNum+')');
+				if( ul[0].scrollTop > slctdLi[0].offsetTop ){
+					ul[0].scrollTop = slctdLi[0].offsetTop;
+				}
+				slctdLi.addClass('highlighted');
 			}
 		}
 
@@ -401,7 +463,11 @@
 			if( crntItemNum < totalItemNum ){
 				crntItemNum++;
 			}
-			ul.find('li.sug-item:nth-child('+crntItemNum+')').addClass('highlighted');
+			var slctdLi = ul.find('li.sug-item:nth-child('+crntItemNum+')');
+			if( (slctdLi[0].offsetTop + slctdLi[0].offsetHeight) > (ul[0].scrollTop +ul[0].offsetHeight ) ){
+				ul[0].scrollTop = ul[0].scrollTop + slctdLi[0].offsetHeight;
+			}
+			slctdLi.addClass('highlighted');
 		}
 
 		function getSelectedCIds( ){
