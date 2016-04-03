@@ -325,6 +325,9 @@
 								enable: true,
 								idKey: 'cid',
 								pIdKey: 'parentName'
+							},
+							key:{
+								title:'title'
 							}
 						},
 						check:{
@@ -347,11 +350,14 @@
 			});
 			slctdTree = $.fn.zTree.init($("#selected_course_list"), {
 				data: {
-						simpleData: {
-							enable: true,
-							idKey: 'cid',
-							pIdKey: 'parentName'
-						}
+					simpleData: {
+						enable: true,
+						idKey: 'cid',
+						pIdKey: 'parentName'
+					},
+					key:{
+						title: 'title'
+					}
 				},
 				callback:{
 					beforeRemove: function( treeId, treeNode ){
