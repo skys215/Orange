@@ -1,7 +1,7 @@
 <?php
 	function getCourseList(){
 		global $_mysqli;
-		$sql = "SELECT * FROM courseinfo WHERE classname NOT LIKE '%毕业%' AND term=".TERM;
+		$sql = "SELECT * FROM courseinfo3 WHERE classname NOT LIKE '%毕业%' AND term=".TERM;
 		$result = $_mysqli->query( $sql );
 
 		$colleges = []; //班级
@@ -40,7 +40,6 @@
 			}
 			$course['parentName'] = $course['classname'].$course['college'];
 			$course['name'] = '('.$course['cid'].')'.$course['classname'];
-			$course['binTimes'] = explode(',', $course['courseTimeBin']);
 			$courses[] = $course;
 		}
 
