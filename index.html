@@ -51,6 +51,9 @@
 			width: 80%;
 			background-color: rgba(255,255,255,0.6);
 		}
+		#timetables td,#timetables th{
+			border: 1px solid black;
+		}
 		ul.schedule{
 			background-color: rgba(255,255,30, 0.6);
 			padding: 0 20px;
@@ -104,128 +107,6 @@
 			</div>
 			<div id="resultPage" class="right">
 				<table id="timetables">
-					<tbody>
-					<tr>
-						<td>-</td>
-						<th>星期一</th>
-						<th>星期二</th>
-						<th>星期三</th>
-						<th>星期四</th>
-						<th>星期五</th>
-					</tr>
-					<tr>
-						<th>1</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>2</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>3</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>4</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>中午休息</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>5</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>6</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>7</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>8</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>5:30-7:00</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>9</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>10<th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>11</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>12</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					</tbody>
 				</table>
 			</div>
 		</div>
@@ -238,6 +119,8 @@
 		var coursesTree;
 		var slctdTree;
 		var slctdCourses = [];
+		var weekDays = [ '星期一', '星期二', '星期三', '星期四', '星期五' ];
+		var dayClasses = ['-', 1,2,3,4,'中午休息',5,6,7,8,'5:30-7:00',9,10,11,12];
 		function addNodeToSelected( nodes ){
 			var parentNode;
 
@@ -256,6 +139,17 @@
 			// append node to parent node
 			slctdTree.copyNode( parentNode, nodes );
 			// done
+
+			//parseTime
+			//checkul
+			//addli
+			//hide
+			var times = [];
+			var classTimes = [];
+			times = Number(nodes.courseTimeSing).toString(2).split('');
+			console.log( times );
+
+			// var ttClass = $('<');
 		}
 
 		function removeNodeFromSelected( nodes ){
@@ -278,40 +172,12 @@
 			var ele = ul.find('li.highlighted');
 			ul.empty();
 			$('#keyword').val('');
-
-			var parentNode;
 			var cid = ele.attr('data-cid');
-			var college = ele.attr('data-college');
-			var classname = ele.attr('data-classname');
-			var classroom = ele.attr('data-classroom');
-			var mainclass = ele.attr('data-mainclass');
-			var classteacher = ele.attr('data-classteacher');
 
-
-			parentNode = slctdTree.getNodeByParam( 'cid', classname+college );
-			//if parent doesn't exists, add parent node
-			if( !parentNode ){
-				var pNode = {
-					"cid": classname+college,
-					"name": classname,
-					"nocheck": true
-				}
-				parentNode = slctdTree.addNodes( null, -1, pNode );
-				parentNode = parentNode[0];
+			var node = coursesTree.getNodeByParam('cid', cid );
+			if( node.length > 0 ){
+				addNodeToSelected( node[0] );
 			}
-			var sameNode = slctdTree.getNodeByParam( 'id', cid );
-			if( sameNode ){
-				return;
-			}
-			var node = {
-				"id": cid,
-				"name": classname+'('+cid+')',
-				"parentName": classname,
-				"cid": classname+college
-			}
-			// append node to parent node
-			slctdTree.addNodes( parentNode, -1, node );
-			// done
 		}
 
 		$(document).ready(function(){
@@ -423,6 +289,8 @@
 			$('#keyword').on('blur', function(){
 				ul.empty();
 			});
+
+			genTimetable();
 		});
 
 		function getResult( keyword ){
@@ -476,7 +344,7 @@
 			slctdLi.addClass('highlighted');
 		}
 
-		function getSelectedCIds( ){
+		function getSelectedCIds(){
 			var courses = slctdTree.getNodesByParam('isParent', true);
 			var courseIds = [];
 			var i = 0;
@@ -512,6 +380,31 @@
 				prntLi.append( ul );
 				ttList.append( prntLi );
 			}
+		}
+
+		function genTimetable(){
+			var cells = [];
+			for( var i in dayClasses ){
+
+				var tr = $('<tr>');
+				var th = [];
+				if( i == 0 ){
+					th.push( $('<th>').text( '-' ) );
+					for( var j in weekDays ){
+						th.push( $('<th>').text( weekDays[j] ) );
+					}
+				}
+				else{
+					th.push( $('<th>').addClass('class_'+i).text( dayClasses[i] ) );
+					for( var j in weekDays ){
+						th.push( $('<td>').addClass('day_'+i).addClass('class_'+i) );
+					}
+				}
+				tr.addClass('class_'+i);
+				tr.append( th );
+				$('#timetables').append( tr );
+			}
+
 		}
 	</script>
 </html>
