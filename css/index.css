@@ -7,7 +7,7 @@
 .container{
 	width: 980px;
 }
-.container div{
+.container>div{
 	outline: 1px solid lime;
 }
 .left, .right{
@@ -51,10 +51,6 @@ ul.ztree{
 ul.schedule{
 	background-color: rgba(255,255,30, 0.6);
 	padding: 0 20px;
-}
-#timetables li{
-	list-style-type: circle;
-	list-style-position: inside;
 }
 li.schedule-case{
 	padding: 10px;
