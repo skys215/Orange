@@ -1,5 +1,5 @@
 var ul = $('#suggestions');
-
+var allScheds = [];
 $(document).ready(function(){
 	$('#start_arrange').on('click', function(){
 		var courses = getSelectedCIds();
@@ -13,57 +13,76 @@ $(document).ready(function(){
 		};
 		$.get('api.php', data, function( result ){
 			result = JSON.parse(result);
-			showTimetables( result['timetables'] );
+			allScheds = result['timetables'];
+			addToList( allScheds );
 		});
 	});
 
 	genTimetable();
+
+	$('#ttList').on('change', function(){
+		var slctdSched = $(this).prop('selectedIndex');
+		showSched(slctdSched);
+	})
 });
-
+function showSched( schedNum ){
+	var sched = allScheds[schedNum];
+	$('#timetables td').text('');
+	$('#timetables td').removeAttr('rowspan');
+	$('#timetables td').show();
+	for( var i in sched ){
+		addClassToTimeTable( sched[i] );
+	}
+}
 function addClassToTimeTable( node ){
-	// var times;
-	times = Number(node.courseTimeSing).toString(2);
-	//pad 60;
-	var pre = 60-times.length;
-	// everyday
-	var st = -1;//start from top
-	while( (ind = times.indexOf('1', st+1))>=0 ){
-		var sameTimeClass = $('div.'+node.classname+'-'+node.college);
-		if( sameTimeClass ){
+	var times = {
+		'': node.allBin,
+		'(单)': node.singBin,
+		'(双)': node.doubBin
+	};
+	for( var i in times ){
+		var time = times[i];
 
+		//pad 60;
+		var pre = 60-time.length;
+		time = time.split('').reverse();
+		while( (b = time.pop())!=undefined ){
+			if( b === '0' ){
+				pre++;
+				continue;
+			}
+
+			var rowspan = 1;
+			var d = 1+Math.floor(pre/12);
+			var t = pre%12+1;
+			var td = $('#timetables td.day_'+d);
+			while( (pre++,c = time.pop()) == '1' ){
+				rowspan++;
+				td.filter('.class_'+((pre+1)%12) ).hide();
+			}
+			td = td.filter('.class_'+t);
+			if( rowspan > 1 ){
+				td.attr('rowspan', rowspan);
+			}
+
+			td.text(td.text()+node.classname+i).attr('title', node.cid+node.classroom);
+			pre++;
 		}
-		ind +=pre;
-		var clsDiv = $('<div>')
-			.addClass('cid_'+node.cid)
-			.addClass(node.classname+'-'+node.college)
-			.text(node.classname+'('+node.cid+')');
-		var d = Math.floor(ind/12)+1;
-		var t = ind%12+1;
-		st = ind-pre;
-		$('#timetables td.day_'+d+'.class_'+t).append( clsDiv );
 	}
 }
 
-function showTimetables( possibleSchedules ){
+function addToList( possibleSchedules ){
 	var ttList = $('#ttList');
 	if( !possibleSchedules.length ){
 		alert('no timetable matched');
 		return false;
 	}
 	ttList.empty();
-	var num = 1;
-	for( var i in possibleSchedules ){
-		var schedule = possibleSchedules[i];
-		var prntLi = $('<li>').attr({'class':'schedule-case'}).text('方案'+num);
-		var ul = $('<ul>').attr({'class':'schedule'});
-		for( var k in schedule ){
-			var course = schedule[k];
-			var li = $('<li>').attr({'class':'schedule-course'}).text(course['classname']+course['cid']+'('+course['classroom']+')');
-			ul.append( li );
-		}
-		num++;
-		prntLi.append( ul );
-		ttList.append( prntLi );
+	var num = possibleSchedules.length;
+	for( var i=0; i< num; i++ ){
+		var opt = $('<option>').attr({'class':'schedule-case'}).text('方案'+String(i+1));
+		opt.append( ul );
+		ttList.append( opt );
 	}
 }
 
@@ -82,7 +101,9 @@ function genTimetable(){
 		else{
 			th.push( $('<th>').addClass('class_'+dayClsKeys[i]).text( dayClasses[i] ) );
 			for( var j in weekDays ){
-				th.push( $('<td>').addClass('day_'+(Number(j)+1)).addClass('class_'+dayClsKeys[i]) );
+				var div = $('<div>').addClass('parent');
+				var td = $('<td>').addClass('day_'+(Number(j)+1)).addClass('class_'+dayClsKeys[i]);
+				th.push( td.append( div ) );
 			}
 		}
 		tr.addClass('class_'+dayClsKeys[i]);

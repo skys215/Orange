@@ -4,9 +4,6 @@ function addNodeToSelected( nodes ){
 	//if is parent, add directly
 	if( nodes.isParent ){
 		parentNode = slctdTree.copyNode(null, nodes, 'next', false );
-		for( var i in parentNode.children){
-			addClassToTimeTable( parentNode.children[i] );
-		}
 		return false;
 	}
 
@@ -19,7 +16,6 @@ function addNodeToSelected( nodes ){
 	// append node to parent node
 	slctdTree.copyNode( parentNode, nodes );
 	// done
-	addClassToTimeTable( nodes );
 }
 
 function removeNodeFromSelected( nodes ){
