@@ -6,19 +6,15 @@ var KEY_SPACE = 20;
 
 var crntItemNum = 0;
 var totalItemNum = 0;
+var q = '';
 $(document).ready(function(){
-	var q = $('#keyword').val();
+	q = $('#keyword').val();
 
 	$('.show_all_class').on('click', function(){
 		$('#all_course_list').toggle();
 	});
 
 	$('#keyword').on('keyup change', function( e ){
-		var t = $(this).val();
-		if( t.length <2){
-			ul.empty();
-			return ;
-		}
 		switch( e.keyCode ){
 			case KEY_UP:
 				e.preventDefault();
@@ -26,24 +22,23 @@ $(document).ready(function(){
 				break;
 			case KEY_DOWN:
 				e.preventDefault();
-				nextItem();
+				if( ul.css('display') == 'none '){
+					getResult();
+				}
+				else{
+					nextItem();
+				}
 				break;
 			case KEY_ENTER:
 				if( ul.css('display') == 'none '){
-					getResult(t);
+					getResult();
 				}
 				else{
 					addNode();
 				}
 				break;
-			case KEY_BACKSPACE:
-				break;
 			default:
-				if( t == q ){
-					return false;
-				}
-				q = t;
-				getResult( t );
+				getResult();
 				break;
 		}
 	});
@@ -62,7 +57,18 @@ $(document).ready(function(){
 
 
 
-function getResult( keyword ){
+function getResult( ){
+	var keyword = $('#keyword').val();
+	if( keyword.length <2){
+		ul.empty();
+		return ;
+	}
+	if( keyword == q ){
+		return false;
+	}
+	q = keyword;
+
+
 	var d = new Date().getTime();
 	$.get('api.php', {"action":'search', 'keyword': keyword, 'd': d }, function( data ){
 		data = $.parseJSON( data );
@@ -86,11 +92,11 @@ function previousItem(){
 	}
 
 	ul.find('li.highlighted').removeClass('highlighted');
+
+	crntItemNum--;
 	if( crntItemNum <= 0 ){
 		return false;
 	}
-
-	crntItemNum--;
 	var slctdLi = ul.find('li.sug-item:nth-child('+crntItemNum+')');
 	if( !slctdLi ){
 		crntItemNum = 0;
@@ -126,7 +132,7 @@ function nextItem(){
 
 function addNode(){
 	var ele = ul.find('li.highlighted');
-	//ul.empty();
+	ul.empty();
 	$('#keyword').val('');
 	var cid = ele.attr('data-cid');
 
