@@ -3,8 +3,8 @@ var ul = $('#suggestions');
 $(document).ready(function(){
 	$('#start_arrange').on('click', function(){
 		var courses = getSelectedCIds();
-		if( !courses.length ){
-			alert('请至少选择一门课程');
+		if( courses.length<2 ){
+			alert('请至少选择两门课程');
 			return false;
 		}
 		var data = {

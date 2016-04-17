@@ -6,15 +6,16 @@ var KEY_SPACE = 20;
 
 var crntItemNum = 0;
 var totalItemNum = 0;
-
 $(document).ready(function(){
+	var q = $('#keyword').val();
+
 	$('.show_all_class').on('click', function(){
 		$('#all_course_list').toggle();
 	});
 
 	$('#keyword').on('keyup change', function( e ){
 		var t = $(this).val();
-		if( t.length <2 ){
+		if( t.length <2){
 			ul.empty();
 			return ;
 		}
@@ -28,16 +29,34 @@ $(document).ready(function(){
 				nextItem();
 				break;
 			case KEY_ENTER:
-				addNode();
+				if( ul.css('display') == 'none '){
+					getResult(t);
+				}
+				else{
+					addNode();
+				}
+				break;
 			case KEY_BACKSPACE:
 				break;
 			default:
+				if( t == q ){
+					return false;
+				}
+				q = t;
 				getResult( t );
 				break;
 		}
 	});
 	$('#keyword').on('blur', function(){
 		ul.empty();
+	});
+	ul.on('mouseover', 'li', function(){
+		ul.find('li.highlighted').removeClass('highlighted');
+		$(this).addClass('highlighted');
+		crntItemNum = $(this).index();
+	})
+	.on('click', 'li', function(){
+		addNode();
 	});
 });
 
@@ -48,6 +67,7 @@ function getResult( keyword ){
 	$.get('api.php', {"action":'search', 'keyword': keyword, 'd': d }, function( data ){
 		data = $.parseJSON( data );
 		ul.empty();
+		crntItemNum = 0;
 
 		var lis = [];
 		for( var item in data.result ){
@@ -61,18 +81,22 @@ function getResult( keyword ){
 }
 
 function previousItem(){
+	if( ul.css('display') == 'none' ){
+		return false;
+	}
+
 	ul.find('li.highlighted').removeClass('highlighted');
 	if( crntItemNum <= 0 ){
 		return false;
 	}
 
+	crntItemNum--;
 	var slctdLi = ul.find('li.sug-item:nth-child('+crntItemNum+')');
 	if( !slctdLi ){
 		crntItemNum = 0;
 		return false;
 	}
 
-	crntItemNum--;
 	if( ul[0].scrollTop > slctdLi[0].offsetTop ){
 		ul[0].scrollTop = slctdLi[0].offsetTop;
 	}
@@ -80,26 +104,35 @@ function previousItem(){
 }
 
 function nextItem(){
+	if( ul.css('display') == 'none' ){
+		return false;
+	}
+
+	if( crntItemNum >= totalItemNum ){
+		return false;
+	}
 	ul.children('.highlighted').removeClass('highlighted');
 
-	if( crntItemNum < totalItemNum ){
-		crntItemNum++;
-	}
+	crntItemNum++;
 	var slctdLi = ul.find('li.sug-item:nth-child('+crntItemNum+')');
 	if( (slctdLi[0].offsetTop + slctdLi[0].offsetHeight) > (ul[0].scrollTop +ul[0].offsetHeight ) ){
 		ul[0].scrollTop = ul[0].scrollTop + slctdLi[0].offsetHeight;
+	}
+	else if( slctdLi[0].offsetTop < ul[0].scrollTop ){
+		ul[0].scrollTop = slctdLi[0].offsetTop;
 	}
 	slctdLi.addClass('highlighted');
 }
 
 function addNode(){
 	var ele = ul.find('li.highlighted');
-	ul.empty();
+	//ul.empty();
 	$('#keyword').val('');
 	var cid = ele.attr('data-cid');
 
 	var node = coursesTree.getNodeByParam('cid', cid );
-	if( node ){
+	var slctd = slctdTree.getNodeByParam('cid', cid);
+	if( node && !slctd ){
 		addNodeToSelected( node );
 	}
 }
