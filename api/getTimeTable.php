@@ -53,17 +53,16 @@
 				$timetable = array_chunk( $timetable, 4 );
 				$cids[$i] = [];
 				foreach( $timetable as $val ){
-					$courseSql = 'SELECT * FROM courseinfo3 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
+					$courseSql = 'SELECT *, courseTimeSing&courseTimeDoub as allBin, (courseTimeSing&courseTimeDoub)^courseTimeSing as singBin, (courseTimeSing&courseTimeDoub)^courseTimeDoub as doubBin FROM courseinfo3 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
 					$courseQuery = $_mysqli->query( $courseSql );
 					while( $courseinfo = $courseQuery->fetch_assoc() ){
 						$courseinfo['sameTimeClass'] = [];
 						if( isset( $sameTimeClass[$courseinfo['cid']] ) ){
 							$courseinfo['sameTimeClass'] = $sameTimeClass[$courseinfo['cid']];
 						}
-						$courseinfo['allBin'] = base_convert($courseinfo['courseTimeSing'] & $courseinfo['courseTimeDoub'], 10,2 );
-						$courseinfo['singBin'] = base_convert($courseinfo['allBin'] ^ $courseinfo['courseTimeSing'], 10 , 2 );
-						$courseinfo['doubBin'] = base_convert($courseinfo['allBin'] ^ $courseinfo['courseTimeDoub'], 10 , 2 );
-
+						$courseinfo['allBin'] = base_convert($courseinfo['allBin'], 10, 2);
+						$courseinfo['singBin'] = base_convert($courseinfo['singBin'], 10, 2);
+						$courseinfo['doubBin'] = base_convert($courseinfo['doubBin'], 10, 2);
 						$cids[$i][] = $courseinfo;
 					}
 					$courseQuery->free();
