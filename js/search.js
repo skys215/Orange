@@ -55,8 +55,6 @@ $(document).ready(function(){
 	});
 });
 
-
-
 function getResult( ){
 	var keyword = $('#keyword').val();
 	if( keyword.length <2){
