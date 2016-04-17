@@ -32,7 +32,8 @@
 				$class = [
 					'cid' => $course['classname'].$course['college'],
 					'name' => $course['classname'],
-					'parentName'=> $course['college']
+					'parentName'=> $course['college'],
+					'title' => $course['classname'].'-'.$course['college']
 				];
 				$courses[] = $class;
 				$classes[$course['college']][$course['classname']] = true;
@@ -40,6 +41,7 @@
 			}
 			$course['parentName'] = $course['classname'].$course['college'];
 			$course['name'] = '('.$course['cid'].')'.$course['classname'];
+			$course['title'] = $course['classname'].'('.$course['cid'].")\n上课时间：".$course['classroom']."\n主讲教师：".$course['classteacher']."\n主选班级：".$course['mainclass']."\n备注：".$course['bz'];
 			$courses[] = $course;
 		}
 
