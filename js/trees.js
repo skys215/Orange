@@ -19,8 +19,6 @@ function addNodeToSelected( nodes ){
 }
 
 function removeNodeFromSelected( nodes ){
-	$('div.cid_'+nodes.cid).remove();
-
 	var parentNode;
 	var n = slctdTree.getNodeByParam( 'cid', nodes.cid );
 	if( nodes.isParent ){
