@@ -7,15 +7,17 @@
 		$tables = [];
 		$chars = 'abcdefghijklmnopqrstuvwxyz';
 		$chars = str_split( $chars );
+		$sameTimeClass = [];
 		$i = 0;
 		foreach( $courses as $classname => $courseIds ){
 			//优化:先筛选上课时间重复的
 			//从用户选择的课程中，获取上课时间不同的课程
-			$sql = 'SELECT cid FROM courseinfo3 WHERE cid in(\''.implode("','", $courseIds).'\') AND term='.TERM.' GROUP BY courseTimeSing, courseTimeDoub,courseTimeNght';
+			$sql = 'SELECT cid, group_concat(cid) as gc FROM courseinfo3 WHERE cid in(\''.implode("','", $courseIds).'\') AND term='.TERM.' GROUP BY courseTimeSing, courseTimeDoub,courseTimeNght';
 			$query = $_mysqli->query( $sql );
 			$distinctTimeCids = [];
 			while( $class = $query->fetch_assoc() ){
 				$distinctTimeCids[] = $class['cid'];
+				$sameTimeClass[$class['cid']] = $class['gc'];
 			}
 			$query->free();
 			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub, courseTimeNght FROM courseinfo3 WHERE cid in(\''.implode("','", $distinctTimeCids).'\') AND term='.TERM.') as '.$chars[$i];
@@ -54,6 +56,14 @@
 					$courseSql = 'SELECT * FROM courseinfo3 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
 					$courseQuery = $_mysqli->query( $courseSql );
 					while( $courseinfo = $courseQuery->fetch_assoc() ){
+						$courseinfo['sameTimeClass'] = [];
+						if( isset( $sameTimeClass[$courseinfo['cid']] ) ){
+							$courseinfo['sameTimeClass'] = $sameTimeClass[$courseinfo['cid']];
+						}
+						$courseinfo['allBin'] = base_convert($courseinfo['courseTimeSing'] & $courseinfo['courseTimeDoub'], 10,2 );
+						$courseinfo['singBin'] = base_convert($courseinfo['allBin'] ^ $courseinfo['courseTimeSing'], 10 , 2 );
+						$courseinfo['doubBin'] = base_convert($courseinfo['allBin'] ^ $courseinfo['courseTimeDoub'], 10 , 2 );
+
 						$cids[$i][] = $courseinfo;
 					}
 					$courseQuery->free();
