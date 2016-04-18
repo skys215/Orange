@@ -73,28 +73,7 @@
 					$nghtConf = (gmp_cmp( gmp_and($nghtBin, $val[3]), 0 ) ==0);
 					$nghtBin = gmp_or( $nghtBin, $val[3] );
 
-					if( ($singConf && $doubConf && $nghtConf) ==false ){
-						// echo '*****';
-						// var_dump($val[0]);
-						// var_dump($timetable[$j-1][4]);
-						// var_dump($val[4]);
-
-						// var_dump( gmp_strval($singBin) );
-						// var_dump( gmp_strval($val[1]) );
-						// var_dump( $singConf );
-
-						// var_dump( gmp_strval($doubBin) );
-						// var_dump( gmp_strval($val[2]) );
-						// var_dump( $doubConf );
-
-						// var_dump( gmp_strval($nghtBin) );
-						// var_dump( gmp_strval($val[3]) );
-						// var_dump( gmp_strval(gmp_xor($nghtBin, $val[3])) );
-						// var_dump( gmp_cmp( $nghtBin, 0) );
-						// var_dump( $nghtConf );
-
-						// echo '--------------<br />';
-						// exit;
+					if( ($singConf || $doubConf || $nghtConf) ==false ){
 						unset( $cids[$i] );
 						break;
 					}
