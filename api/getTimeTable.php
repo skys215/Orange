@@ -47,12 +47,58 @@
 
 		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
 
-		for( $page = 0; $page<=$row/$size; $page++ ){
+		for( $page = 0; $page<=$rows/$size; $page++ ){
 			$query = $_mysqli->query( $finalSql.' LIMIT '.$size.' OFFSET '.($page*$size) );
 			while( $timetable = $query->fetch_row() ){
 				$timetable = array_chunk( $timetable, 4 );
 				$cids[$i] = [];
+				$singBin = gmp_init(0);
+				$doubBin = gmp_init(0);
+				$nghtMax = gmp_sub(gmp_pow(2,5), 1);
+				$nghtBin = $nghtMax;
+
+				$j = 0;
+				// echo $i,'<br />';
 				foreach( $timetable as $val ){
+					$val[1] = gmp_init($val[1],10);
+					$val[2] = gmp_init($val[2],10);
+					$val[3] = gmp_init($val[3],10);
+
+
+					$singConf = (gmp_cmp( gmp_and($singBin, $val[1]) , 0 )==0);  //相等时返回值为0，不等于0说明时间冲突
+					$singBin  = gmp_or( $singBin, $val[1] );
+
+					$doubConf = (gmp_cmp( gmp_and($doubBin, $val[2]), 0 )==0);
+					$doubBin  = gmp_or( $doubBin, $val[2] );
+
+					$nghtBin = gmp_xor($nghtBin, $val[3]);
+					$nghtConf = (gmp_cmp( $nghtBin, $nghtMax ) ==0);
+					if( ($singConf && $doubConf && $nghtConf) ==false ){
+						// echo '*****';
+						// var_dump($val[0]);
+						// var_dump($timetable[$j-1][4]);
+						// var_dump($val[4]);
+
+						// var_dump( gmp_strval($singBin) );
+						// var_dump( gmp_strval($val[1]) );
+						// var_dump( $singConf );
+
+						// var_dump( gmp_strval($doubBin) );
+						// var_dump( gmp_strval($val[2]) );
+						// var_dump( $doubConf );
+
+						// var_dump( gmp_strval($nghtBin) );
+						// var_dump( gmp_strval($val[3]) );
+						// var_dump( gmp_strval(gmp_xor($nghtBin, $val[3])) );
+						// var_dump( gmp_cmp( $nghtBin, $nghtMax) );
+						// var_dump( $nghtConf );
+
+						// echo '--------------<br />';
+						// exit;
+						unset( $cids[$i] );
+						break;
+					}
+
 					$courseSql = 'SELECT *, courseTimeSing&courseTimeDoub as allBin, (courseTimeSing&courseTimeDoub)^courseTimeSing as singBin, (courseTimeSing&courseTimeDoub)^courseTimeDoub as doubBin FROM courseinfo3 WHERE term='.TERM.' AND cid=\''.$val[0].'\'';
 					$courseQuery = $_mysqli->query( $courseSql );
 					while( $courseinfo = $courseQuery->fetch_assoc() ){
@@ -66,11 +112,15 @@
 						$cids[$i][] = $courseinfo;
 					}
 					$courseQuery->free();
+					$j++;
 				}
 				$i++;
 			}
+			// var_dump($cids);
+			// 	exit;
 		}
-
+		array_filter($cids);
+		sort($cids);
 		$result = [];
 		$result['timetables'] = $cids;
 		return $result;
