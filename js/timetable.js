@@ -84,6 +84,7 @@ function addToList( possibleSchedules ){
 		opt.append( ul );
 		ttList.append( opt );
 	}
+	showSched( 0 );
 }
 
 function genTimetable(){
