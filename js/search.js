@@ -71,6 +71,7 @@ function getResult( ){
 	$.get('api.php', {"action":'search', 'keyword': keyword, 'd': d }, function( data ){
 		data = $.parseJSON( data );
 		ul.empty();
+		ul.show();
 		crntItemNum = 0;
 
 		var lis = [];
