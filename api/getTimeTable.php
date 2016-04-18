@@ -54,8 +54,7 @@
 				$cids[$i] = [];
 				$singBin = gmp_init(0);
 				$doubBin = gmp_init(0);
-				$nghtMax = gmp_sub(gmp_pow(2,5), 1);
-				$nghtBin = $nghtMax;
+				$nghtBin = gmp_init(0);
 
 				$j = 0;
 				// echo $i,'<br />';
@@ -71,8 +70,9 @@
 					$doubConf = (gmp_cmp( gmp_and($doubBin, $val[2]), 0 )==0);
 					$doubBin  = gmp_or( $doubBin, $val[2] );
 
-					$nghtBin = gmp_xor($nghtBin, $val[3]);
-					$nghtConf = (gmp_cmp( $nghtBin, $nghtMax ) ==0);
+					$nghtConf = (gmp_cmp( gmp_and($nghtBin, $val[3]), 0 ) ==0);
+					$nghtBin = gmp_or( $nghtBin, $val[3] );
+
 					if( ($singConf && $doubConf && $nghtConf) ==false ){
 						// echo '*****';
 						// var_dump($val[0]);
@@ -90,7 +90,7 @@
 						// var_dump( gmp_strval($nghtBin) );
 						// var_dump( gmp_strval($val[3]) );
 						// var_dump( gmp_strval(gmp_xor($nghtBin, $val[3])) );
-						// var_dump( gmp_cmp( $nghtBin, $nghtMax) );
+						// var_dump( gmp_cmp( $nghtBin, 0) );
 						// var_dump( $nghtConf );
 
 						// echo '--------------<br />';
@@ -109,6 +109,7 @@
 						$courseinfo['allBin'] = base_convert($courseinfo['allBin'], 10, 2);
 						$courseinfo['singBin'] = base_convert($courseinfo['singBin'], 10, 2);
 						$courseinfo['doubBin'] = base_convert($courseinfo['doubBin'], 10, 2);
+						$courseinfo['nghtBin'] = base_convert($courseinfo['courseTimeNght'], 10, 2);
 						$cids[$i][] = $courseinfo;
 					}
 					$courseQuery->free();

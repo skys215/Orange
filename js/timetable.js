@@ -37,8 +37,8 @@ function showSched( schedNum ){
 function addClassToTimeTable( node ){
 	var times = {
 		'': node.allBin,
-		'(单)': node.singBin,
-		'(双)': node.doubBin
+		'(单)<br/>': node.singBin,
+		'(双)<br/>': node.doubBin
 	};
 	for( var i in times ){
 		var time = times[i];
@@ -58,16 +58,35 @@ function addClassToTimeTable( node ){
 			var td = $('#timetables td.day_'+d);
 			while( (pre++,c = time.pop()) == '1' ){
 				rowspan++;
-				td.filter('.class_'+((pre+1)%12) ).hide();
+				td.filter('.class_'+(pre%12+1) ).hide();
 			}
 			td = td.filter('.class_'+t);
 			if( rowspan > 1 ){
 				td.attr('rowspan', rowspan);
 			}
 
-			td.text(td.text()+node.classname+i).attr('title', node.cid+node.classroom);
+			td.html(td.text()+node.classname+i).attr('title', node.cid+node.classroom);
 			pre++;
 		}
+	}
+
+
+	if( !node.nghtBin ){
+		return;
+	}
+	//pad 5;
+	time = node.nghtBin.split('').reverse();
+	pre = 5-time.length;
+	while( (b = time.pop())!=undefined ){
+		if( b === '0' ){
+			pre++;
+			continue;
+		}
+
+		var d = 1+pre;
+		var td = $('#timetables td.day_'+d).filter('.class_13');
+		td.html(td.text()+node.classname).attr('title', node.cid+node.classroom);
+		pre++;
 	}
 }
 
