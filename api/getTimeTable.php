@@ -73,7 +73,7 @@
 					$nghtConf = (gmp_cmp( gmp_and($nghtBin, $val[3]), 0 ) ==0);
 					$nghtBin = gmp_or( $nghtBin, $val[3] );
 
-					if($singConf || $doubConf || $nghtConf ){
+					if( ($singConf && $doubConf && $nghtConf) == false ){
 						unset( $cids[$i] );
 						break;
 					}
