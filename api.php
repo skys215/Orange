@@ -8,7 +8,7 @@
 	switch( $action ){
 		case 'course_list':
 			include( 'api/courseList.php' );
-			$data = getCourseList( $_mysqli );
+			$data = getCourseList( );
 			break;
 		case 'get_time_table':
 			include( 'api/getTimeTable.php' );
