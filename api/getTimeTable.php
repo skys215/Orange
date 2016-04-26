@@ -17,7 +17,7 @@
 			$distinctTimeCids = [];
 			while( $class = $query->fetch_assoc() ){
 				$distinctTimeCids[] = $class['cid'];
-				$sameTimeClass[$class['cid']] = $class['gc'];
+				$sameTimeClass[$class['cid']] = explode(',',$class['gc']);
 			}
 			$query->free();
 			$tables[] = '( SELECT cid, courseTimeSing, courseTimeDoub, courseTimeNght FROM courseinfo3 WHERE cid in(\''.implode("','", $distinctTimeCids).'\') AND term='.TERM.') as '.$chars[$i];
@@ -40,12 +40,12 @@
 		$page = 0;
 		$size = 500;
 
-		$countSql = 'SELECT COUNT(a.cid) as c FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
+		$countSql = 'SELECT COUNT(a.cid) as c FROM '.implode( ',', $tables );//.' WHERE '.implode(' AND ', $whereClause );
 		$countQuery = $_mysqli->query( $countSql );
 		$countResult = $countQuery->fetch_row();
 		$rows = $countResult[0];
 
-		$finalSql = 'SELECT * FROM '.implode( ',', $tables ).' WHERE '.implode(' AND ', $whereClause );
+		$finalSql = 'SELECT * FROM '.implode( ',', $tables );//.' WHERE '.implode(' AND ', $whereClause );
 
 		for( $page = 0; $page<=$rows/$size; $page++ ){
 			$query = $_mysqli->query( $finalSql.' LIMIT '.$size.' OFFSET '.($page*$size) );
@@ -83,7 +83,8 @@
 					while( $courseinfo = $courseQuery->fetch_assoc() ){
 						$courseinfo['sameTimeClass'] = [];
 						if( isset( $sameTimeClass[$courseinfo['cid']] ) ){
-							$courseinfo['sameTimeClass'] = $sameTimeClass[$courseinfo['cid']];
+							$courseinfo['sameTimeClass'] = array_diff($sameTimeClass[$courseinfo['cid']], [$courseinfo['cid']]);
+							sort($courseinfo['sameTimeClass']);
 						}
 						$courseinfo['allBin'] = base_convert($courseinfo['allBin'], 10, 2);
 						$courseinfo['singBin'] = base_convert($courseinfo['singBin'], 10, 2);

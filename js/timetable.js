@@ -34,6 +34,7 @@ function showSched( schedNum ){
 	$('#timetables td').text('');
 	$('#timetables td').removeAttr('rowspan');
 	$('#timetables td').show();
+	slctdTree.cancelSelectedNode();
 	for( var i in sched ){
 		addClassToTimeTable( sched[i] );
 	}
@@ -44,6 +45,21 @@ function addClassToTimeTable( node ){
 		'(单)<br/>': node.singBin,
 		'(双)<br/>': node.doubBin
 	};
+	slctdTree.selectNode( slctdTree.getNodeByParam('cid',node.cid ), true, true );
+	// 选中相同的课程
+	var sameTimeClass = node.sameTimeClass;
+	var sameTxt = '';
+	if( sameTimeClass.length ){
+		for( var k in sameTimeClass ){
+			var n = slctdTree.getNodeByParam( 'cid', sameTimeClass[k] );
+			if( n ){
+				slctdTree.selectNode( n, true, true );
+			}
+		}
+		sameTxt = '(可选同时间课程：'+sameTimeClass.join(',')+')\n';
+	}
+
+	//取消所有 click
 	for( var i in times ){
 		var time = times[i];
 
@@ -69,7 +85,7 @@ function addClassToTimeTable( node ){
 				td.attr('rowspan', rowspan);
 			}
 
-			td.html(td.text()+node.classname+i).attr('title', node.cid+node.classroom);
+			td.html(td.text()+node.classname+i).attr('title', node.cid+'\n'+sameTxt+node.classroom);
 			pre++;
 		}
 	}
@@ -107,6 +123,7 @@ function addToList( possibleSchedules ){
 		opt.append( ul );
 		ttList.append( opt );
 	}
+	ttList.css('visibility','visible')
 	showSched( 0 );
 }
 
@@ -123,7 +140,11 @@ function genTimetable(){
 			}
 		}
 		else{
-			th.push( $('<th>').addClass('class_'+dayClsKeys[i]).text( dayClasses[i] ) );
+			var txt = dayClasses[i];
+			if( i != 9 ){
+				txt = '第'+txt+'节';
+			}
+			th.push( $('<th>').addClass('class_'+dayClsKeys[i]).text( txt ) );
 			for( var j in weekDays ){
 				var div = $('<div>').addClass('parent');
 				var td = $('<td>').addClass('day_'+(Number(j)+1)).addClass('class_'+dayClsKeys[i]);
