@@ -4,75 +4,66 @@
 	margin: 0 auto;
 	font-family: "Microsoft Yahei UI","Microsoft YaHei",Helvetica,Arial,sans-serif;
 }
+body{
+	background-color: #fafafa;
+}
 .container{
+	margin-top: 20px;
 	width: 980px;
 }
 .container>div{
-	outline: 1px solid lime;
+	outline: 1px solid #D8F5CA;
 }
 .left, .right{
 	height: 85vh;
+	padding: 10px;
 }
 .left{
 	width: 300px;
 	float:left;
 }
 .right{
-	margin-left: 300px;
+	margin-left: 340px;
 }
-#selectPage{
-	background: khaki;
-	padding: 0 auto;
-	margin: auto 0;
-}
-#selectPage div{
-	display: inline-block;
+div.slctd{
+	padding-top: 10px;
 }
 ul.ztree{
-	height: 80vh;
+	height: 75vh;
 	overflow: auto;
 }
 #all_course_list{
 	display: none;
 	position:absolute;
-	margin-top: 20px;
+	margin-top: 25px;
 	margin-left: 80px;
-	background-color: lightsteelblue;
-	box-shadow: 3px 3px 3px rgba(0,0,0,0.3);
+	background-color: #DDEAE4;
+	box-shadow: 0px 0px 10px rgba(0,0,0,0.8);
 	width: 380px;
+}
+#ttList{
+	visibility: hidden;
 }
 #timetables{
 	width: 80%;
 	background-color: rgba(255,255,255,0.6);
 }
-#timetables td,#timetables th{
+#timetables td,
+#timetables th{
 	border: 1px solid black;
 }
-ul.schedule{
-	background-color: rgba(255,255,30, 0.6);
-	padding: 0 20px;
-}
-li.schedule-case{
-	padding: 10px;
-	list-style-type: square;
-	list-style-position: inside;
-}
-
 #suggestions{
 	position: absolute;
 	margin: 0;
 	padding: 0;
 
 	background-color: salmon;
-	box-shadow: 0px 3px 3px rgba(0,0,0,0.3);
+	box-shadow: 25px 25px 50px rgba(0,0,0,0.3);
 	width: 500px;
 	max-height: 80vh;
 	margin-top: 20px;
 	text-align: left;
 	overflow: auto;
-}
-#suggestions:empty{
-	display:none;
 }
 #suggestions li{
 	padding: 12px;
