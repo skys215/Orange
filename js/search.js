@@ -7,6 +7,8 @@ var KEY_SPACE = 20;
 var crntItemNum = 0;
 var totalItemNum = 0;
 var q = '';
+var ul = $('#suggestions');
+
 $(document).ready(function(){
 	q = $('#keyword').val();
 
@@ -42,9 +44,6 @@ $(document).ready(function(){
 				break;
 		}
 	});
-	$('#keyword').on('blur', function(){
-		ul.empty();
-	});
 	ul.on('mouseover', 'li', function(){
 		ul.find('li.highlighted').removeClass('highlighted');
 		$(this).addClass('highlighted');
@@ -52,6 +51,10 @@ $(document).ready(function(){
 	})
 	.on('click', 'li', function(){
 		addNode();
+	});
+
+	$('*:not(#keyword):not(#suggestions)').on('click', function(){
+		ul.empty();
 	});
 });
 

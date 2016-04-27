@@ -1,4 +1,3 @@
-var ul = $('#suggestions');
 var allScheds = [];
 
 var dayClasses = ['-', 1,2,3,4,5,6,7,8,'5:30-7:00',9,10,11,12];
