@@ -98,12 +98,8 @@ $(document).ready(function(){
 					slctdTree.expandNode( nodes, true, false, true );
 					return;
 				}
-				//parseTime
-				//checkul
-				//addli
-				//hide
-
-			}
+			},
+			beforeDrag: function(){ return false;}
 		},
 		edit: {
 			enable:true,
